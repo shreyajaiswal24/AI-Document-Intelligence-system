@@ -1,0 +1,220 @@
+[
+  {
+    "question": "What are the four functions of the AI RMF Core?",
+    "expected_answer": "GOVERN, MAP, MEASURE and MANAGE.",
+    "keywords": [
+      "govern",
+      "map",
+      "measure",
+      "manage"
+    ],
+    "expected_sources": [
+      [
+        "NIST.AI.100-1.pdf",
+        5
+      ],
+      [
+        "NIST.AI.100-1.pdf",
+        25
+      ]
+    ]
+  },
+  {
+    "question": "Which law directed NIST to develop the AI Risk Management Framework?",
+    "expected_answer": "The National Artificial Intelligence Initiative Act of 2020 (P.L. 116-283).",
+    "keywords": [
+      "National Artificial Intelligence Initiative Act",
+      "2020"
+    ],
+    "expected_sources": [
+      [
+        "NIST.AI.100-1.pdf",
+        7
+      ]
+    ]
+  },
+  {
+    "question": "Which AI RMF function is described as cross-cutting?",
+    "expected_answer": "GOVERN - it is designed to inform and be infused throughout the other three functions.",
+    "keywords": [
+      "govern"
+    ],
+    "expected_sources": [
+      [
+        "NIST.AI.100-1.pdf",
+        5
+      ],
+      [
+        "NIST.AI.100-1.pdf",
+        25
+      ],
+      [
+        "NIST.AI.100-1.pdf",
+        27
+      ]
+    ]
+  },
+  {
+    "question": "Why does the AI RMF describe AI systems as socio-technical?",
+    "expected_answer": "Because they are influenced by societal dynamics and human behavior; risks come from technical aspects combined with societal factors.",
+    "keywords": [
+      "societal",
+      "human behavior"
+    ],
+    "expected_sources": [
+      [
+        "NIST.AI.100-1.pdf",
+        6
+      ]
+    ]
+  },
+  {
+    "question": "What are the characteristics of trustworthy AI systems according to the AI RMF?",
+    "expected_answer": "Valid and reliable, safe, secure and resilient, accountable and transparent, explainable and interpretable, privacy-enhanced, and fair with harmful bias managed.",
+    "keywords": [
+      "valid",
+      "reliable",
+      "safe",
+      "secure",
+      "resilient",
+      "accountable",
+      "transparent",
+      "explainable",
+      "interpretable",
+      "privacy",
+      "fair"
+    ],
+    "expected_sources": [
+      [
+        "NIST.AI.100-1.pdf",
+        17
+      ]
+    ]
+  },
+  {
+    "question": "Where can comments on the AI RMF Playbook be sent?",
+    "expected_answer": "By email to AIframework@nist.gov.",
+    "keywords": [
+      "AIframework@nist.gov"
+    ],
+    "expected_sources": [
+      [
+        "NIST.AI.100-1.pdf",
+        3
+      ]
+    ]
+  },
+  {
+    "question": "How does the Generative AI Profile define confabulation?",
+    "expected_answer": "The production of confidently stated but erroneous or false content (hallucinations) by which users may be misled or deceived.",
+    "keywords": [
+      "confidently",
+      "false"
+    ],
+    "expected_sources": [
+      [
+        "NIST.AI.600-1.pdf",
+        8
+      ],
+      [
+        "NIST.AI.600-1.pdf",
+        10
+      ]
+    ]
+  },
+  {
+    "question": "What does the Environmental Impacts risk refer to for generative AI?",
+    "expected_answer": "Impacts from the high compute/energy resources used to train and run GAI models, which may harm ecosystems (energy use and carbon emissions).",
+    "keywords": [
+      "training"
+    ],
+    "expected_sources": [
+      [
+        "NIST.AI.600-1.pdf",
+        8
+      ],
+      [
+        "NIST.AI.600-1.pdf",
+        12
+      ]
+    ]
+  },
+  {
+    "question": "What four primary considerations did the Generative AI Public Working Group focus on?",
+    "expected_answer": "Governance, Content Provenance, Pre-deployment Testing, and Incident Disclosure.",
+    "keywords": [
+      "governance",
+      "provenance",
+      "pre deployment testing",
+      "incident disclosure"
+    ],
+    "expected_sources": [
+      [
+        "NIST.AI.600-1.pdf",
+        6
+      ]
+    ]
+  },
+  {
+    "question": "Which generative AI risks fall under misuse by humans?",
+    "expected_answer": "CBRN Information or Capabilities; Data Privacy; Human-AI Configuration; Obscene, Degrading, and/or Abusive Content; Information Integrity; Information Security.",
+    "keywords": [
+      "CBRN",
+      "privacy",
+      "human AI configuration",
+      "obscene",
+      "information integrity",
+      "information security"
+    ],
+    "expected_sources": [
+      [
+        "NIST.AI.600-1.pdf",
+        7
+      ]
+    ]
+  },
+  {
+    "question": "When was the Generative AI Profile (NIST AI 600-1) published?",
+    "expected_answer": "July 2024.",
+    "keywords": [
+      "July 2024"
+    ],
+    "expected_sources": [
+      [
+        "NIST.AI.600-1.pdf",
+        2
+      ]
+    ]
+  },
+  {
+    "question": "Which executive order is the Generative AI Profile written in response to?",
+    "expected_answer": "Executive Order 14110 on Safe, Secure, and Trustworthy Artificial Intelligence.",
+    "keywords": [
+      "14110"
+    ],
+    "expected_sources": [
+      [
+        "NIST.AI.600-1.pdf",
+        5
+      ]
+    ]
+  },
+  {
+    "question": "What is the annual budget of the U.S. AI Safety Institute?",
+    "expected_answer": "Not in the documents (should abstain). The institute is mentioned, but not its budget.",
+    "keywords": [],
+    "expected_sources": []
+  },
+  {
+    "question": "How many parameters does GPT-4 have?",
+    "expected_answer": "Not in the documents (should abstain).",
+    "keywords": [],
+    "expected_sources": []
+  },
+  {
+    "question": "Who won the 2022 FIFA World Cup?",
+    "expected_answer": "Not in the documents (should abstain).",
+    "keywords": [],
+    "expected_sources": []
+  }
+]
