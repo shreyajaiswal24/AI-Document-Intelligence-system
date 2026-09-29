@@ -1,220 +1,77 @@
 [
   {
-    "question": "What are the four functions of the AI RMF Core?",
-    "expected_answer": "GOVERN, MAP, MEASURE and MANAGE.",
-    "keywords": [
-      "govern",
-      "map",
-      "measure",
-      "manage"
-    ],
-    "expected_sources": [
-      [
-        "NIST.AI.100-1.pdf",
-        5
-      ],
-      [
-        "NIST.AI.100-1.pdf",
-        25
-      ]
-    ]
+    "question": "Which hackathon and track was Dukaan Saathi built for?",
+    "expected_answer": "Paytm Build for India AI Hackathon, Mumbai - Track 1: Merchant Growth AI.",
+    "expected_source": "Dukaan-Saathi.pdf p1"
   },
   {
-    "question": "Which law directed NIST to develop the AI Risk Management Framework?",
-    "expected_answer": "The National Artificial Intelligence Initiative Act of 2020 (P.L. 116-283).",
-    "keywords": [
-      "National Artificial Intelligence Initiative Act",
-      "2020"
-    ],
-    "expected_sources": [
-      [
-        "NIST.AI.100-1.pdf",
-        7
-      ]
-    ]
+    "question": "Who is the merchant persona used in the Dukaan Saathi pitch?",
+    "expected_answer": "Ramesh, who runs a kirana + chai counter in Dadar, Mumbai, speaks Marathi and Hindi.",
+    "expected_source": "Dukaan-Saathi.pdf p2"
   },
   {
-    "question": "Which AI RMF function is described as cross-cutting?",
-    "expected_answer": "GOVERN - it is designed to inform and be infused throughout the other three functions.",
-    "keywords": [
-      "govern"
-    ],
-    "expected_sources": [
-      [
-        "NIST.AI.100-1.pdf",
-        5
-      ],
-      [
-        "NIST.AI.100-1.pdf",
-        25
-      ],
-      [
-        "NIST.AI.100-1.pdf",
-        27
-      ]
-    ]
+    "question": "What does the Regulars Radar feature do?",
+    "expected_answer": "Finds repeat payers who have gone quiet and proposes a targeted nudge before they are lost.",
+    "expected_source": "Dukaan-Saathi.pdf p5"
   },
   {
-    "question": "Why does the AI RMF describe AI systems as socio-technical?",
-    "expected_answer": "Because they are influenced by societal dynamics and human behavior; risks come from technical aspects combined with societal factors.",
-    "keywords": [
-      "societal",
-      "human behavior"
-    ],
-    "expected_sources": [
-      [
-        "NIST.AI.100-1.pdf",
-        6
-      ]
-    ]
+    "question": "Which LLM does Dukaan Saathi use for reasoning, and what is the fallback?",
+    "expected_answer": "Sarvam-M, with Groq as the fallback.",
+    "expected_source": "Dukaan-Saathi.pdf p6, p8"
   },
   {
-    "question": "What are the characteristics of trustworthy AI systems according to the AI RMF?",
-    "expected_answer": "Valid and reliable, safe, secure and resilient, accountable and transparent, explainable and interpretable, privacy-enhanced, and fair with harmful bias managed.",
-    "keywords": [
-      "valid",
-      "reliable",
-      "safe",
-      "secure",
-      "resilient",
-      "accountable",
-      "transparent",
-      "explainable",
-      "interpretable",
-      "privacy",
-      "fair"
-    ],
-    "expected_sources": [
-      [
-        "NIST.AI.100-1.pdf",
-        17
-      ]
-    ]
+    "question": "Which tool does Dukaan Saathi use for memory?",
+    "expected_answer": "Cognee - a knowledge graph of the shop (customers, items, decisions).",
+    "expected_source": "Dukaan-Saathi.pdf p6, p8"
   },
   {
-    "question": "Where can comments on the AI RMF Playbook be sent?",
-    "expected_answer": "By email to AIframework@nist.gov.",
-    "keywords": [
-      "AIframework@nist.gov"
-    ],
-    "expected_sources": [
-      [
-        "NIST.AI.100-1.pdf",
-        3
-      ]
-    ]
+    "question": "What are the steps of the agent loop?",
+    "expected_answer": "Observe, Diagnose, Recommend, Approve, Act, Learn.",
+    "expected_source": "Dukaan-Saathi.pdf p6, p7"
   },
   {
-    "question": "How does the Generative AI Profile define confabulation?",
-    "expected_answer": "The production of confidently stated but erroneous or false content (hallucinations) by which users may be misled or deceived.",
-    "keywords": [
-      "confidently",
-      "false"
-    ],
-    "expected_sources": [
-      [
-        "NIST.AI.600-1.pdf",
-        8
-      ],
-      [
-        "NIST.AI.600-1.pdf",
-        10
-      ]
-    ]
+    "question": "Can Dukaan Saathi move the merchant's money?",
+    "expected_answer": "No. It only reads payments and pre-fills forms; it cannot move funds or change settlement details.",
+    "expected_source": "Dukaan-Saathi.pdf p7"
   },
   {
-    "question": "What does the Environmental Impacts risk refer to for generative AI?",
-    "expected_answer": "Impacts from the high compute/energy resources used to train and run GAI models, which may harm ecosystems (energy use and carbon emissions).",
-    "keywords": [
-      "training"
-    ],
-    "expected_sources": [
-      [
-        "NIST.AI.600-1.pdf",
-        8
-      ],
-      [
-        "NIST.AI.600-1.pdf",
-        12
-      ]
-    ]
+    "question": "In the sample morning brief, what were yesterday's sales and how did they compare to the usual?",
+    "expected_answer": "6,200 - 18% lower than the Tuesday average.",
+    "expected_source": "Dukaan-Saathi.pdf p4"
   },
   {
-    "question": "What four primary considerations did the Generative AI Public Working Group focus on?",
-    "expected_answer": "Governance, Content Provenance, Pre-deployment Testing, and Incident Disclosure.",
-    "keywords": [
-      "governance",
-      "provenance",
-      "pre deployment testing",
-      "incident disclosure"
-    ],
-    "expected_sources": [
-      [
-        "NIST.AI.600-1.pdf",
-        6
-      ]
-    ]
+    "question": "What happens at 1:45 in the Dukaan Saathi demo?",
+    "expected_answer": "Ramesh approves the chai-combo offer with one tap; the n8n workflow fires and the activity log shows the messages going out.",
+    "expected_source": "Dukaan-Saathi.pdf p10"
   },
   {
-    "question": "Which generative AI risks fall under misuse by humans?",
-    "expected_answer": "CBRN Information or Capabilities; Data Privacy; Human-AI Configuration; Obscene, Degrading, and/or Abusive Content; Information Integrity; Information Security.",
-    "keywords": [
-      "CBRN",
-      "privacy",
-      "human AI configuration",
-      "obscene",
-      "information integrity",
-      "information security"
-    ],
-    "expected_sources": [
-      [
-        "NIST.AI.600-1.pdf",
-        7
-      ]
-    ]
+    "question": "Which n8n actions are included in the hackathon MVP?",
+    "expected_answer": "Three actions: offer, restock order and loan pre-fill.",
+    "expected_source": "Dukaan-Saathi.pdf p11"
   },
   {
-    "question": "When was the Generative AI Profile (NIST AI 600-1) published?",
-    "expected_answer": "July 2024.",
-    "keywords": [
-      "July 2024"
-    ],
-    "expected_sources": [
-      [
-        "NIST.AI.600-1.pdf",
-        2
-      ]
-    ]
+    "question": "What does the team ask Paytm for?",
+    "expected_answer": "Sandbox access to merchant transaction and settlement APIs, and one real merchant in Mumbai to pilot the morning brief with.",
+    "expected_source": "Dukaan-Saathi.pdf p12"
   },
   {
-    "question": "Which executive order is the Generative AI Profile written in response to?",
-    "expected_answer": "Executive Order 14110 on Safe, Secure, and Trustworthy Artificial Intelligence.",
-    "keywords": [
-      "14110"
-    ],
-    "expected_sources": [
-      [
-        "NIST.AI.600-1.pdf",
-        5
-      ]
-    ]
+    "question": "How many merchants will be part of the Dukaan Saathi pilot?",
+    "expected_answer": "Not in the document - the deck only has a blank: 'Pilot with [__] merchants'. Should say insufficient information.",
+    "expected_source": "-"
   },
   {
-    "question": "What is the annual budget of the U.S. AI Safety Institute?",
-    "expected_answer": "Not in the documents (should abstain). The institute is mentioned, but not its budget.",
-    "keywords": [],
-    "expected_sources": []
+    "question": "How much will Dukaan Saathi cost a merchant per month?",
+    "expected_answer": "Not in the document. Should say insufficient information.",
+    "expected_source": "-"
   },
   {
-    "question": "How many parameters does GPT-4 have?",
-    "expected_answer": "Not in the documents (should abstain).",
-    "keywords": [],
-    "expected_sources": []
+    "question": "Did Dukaan Saathi win the hackathon?",
+    "expected_answer": "Not in the document. Should say insufficient information.",
+    "expected_source": "-"
   },
   {
     "question": "Who won the 2022 FIFA World Cup?",
-    "expected_answer": "Not in the documents (should abstain).",
-    "keywords": [],
-    "expected_sources": []
+    "expected_answer": "Not in the document. Should say insufficient information.",
+    "expected_source": "-"
   }
 ]

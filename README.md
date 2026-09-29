@@ -46,7 +46,7 @@ eval/
   run_eval.py       runs them and writes results.csv
   results.md        results and discussion
 tests/              API and unit tests
-data/               sample PDFs used for the evaluation (NIST, public domain)
+data/               sample PDFs used for the evaluation
 ```
 
 ## Setup
@@ -97,11 +97,10 @@ streamlit run streamlit_app.py
 Upload a PDF (multipart form, field name `file`).
 
 ```bash
-curl -F "file=@data/NIST.AI.100-1.pdf" http://localhost:8000/upload
-curl -F "file=@data/NIST.AI.600-1.pdf" http://localhost:8000/upload
+curl -F "file=@data/Dukaan-Saathi.pdf" http://localhost:8000/upload
 ```
 ```json
-{"file_name": "NIST.AI.100-1.pdf", "pages_with_text": 48, "chunks": 277}
+{"file_name": "Dukaan-Saathi.pdf", "pages_with_text": 12, "chunks": 20}
 ```
 
 | Status | When |
@@ -118,13 +117,13 @@ Uploading the same file again replaces its chunks (no duplicates).
 ```bash
 curl -X POST http://localhost:8000/ask \
   -H "Content-Type: application/json" \
-  -d '{"question": "What are the four functions of the AI RMF Core?"}'
+  -d '{"question": "Which LLM does Dukaan Saathi use?"}'
 ```
 Returns the answer and the sources it used (file name and page for each citation):
 ```json
 {
-  "answer": "The AI RMF Core has four functions: GOVERN, MAP, MEASURE and MANAGE [1].",
-  "citations": [{"file_name": "NIST.AI.100-1.pdf", "page": 25}],
+  "answer": "Dukaan Saathi uses Sarvam-M as its main LLM, with a Groq model as the fallback [2].",
+  "citations": [{"file_name": "Dukaan-Saathi.pdf", "page": 8}],
   "answered": true
 }
 ```
@@ -138,7 +137,7 @@ If the answer is not in the documents, `answer` is "Insufficient information..."
 
 ### `GET /health`
 ```json
-{"status": "ok", "vector_db": "ok", "groq_api_key_set": true, "llm_model": "openai/gpt-oss-120b", "chunks_indexed": 678}
+{"status": "ok", "vector_db": "ok", "groq_api_key_set": true, "llm_model": "openai/gpt-oss-120b", "chunks_indexed": 20}
 ```
 `status` is `degraded` if the vector DB is down or the API key is missing.
 
@@ -151,7 +150,7 @@ If the answer is not in the documents, `answer` is "Insufficient information..."
 
 ### Chunking — 600 characters, 100 overlap
 - The embedding model only reads about 1000 characters, so chunks must be smaller than that.
-- I tested 400, 600, 800 and 1000 characters (see [eval/results.md](eval/results.md)). 400–800 worked about the same, 1000 was worse.
+- I tested 400, 600, 800 and 1000 characters (see [eval/results.md](eval/results.md)). 600 was the best (or tied) at every top-k setting.
 - Smaller chunks usually hold one topic, which makes search more accurate.
 - Chunks are cut at a paragraph, sentence or word boundary, never in the middle of a word.
 - The 100-character overlap means a sentence on the border between two chunks is not lost.
@@ -159,7 +158,7 @@ If the answer is not in the documents, `answer` is "Insufficient information..."
 ### Embeddings — all-MiniLM-L6-v2
 - Runs locally on CPU: free, fast, and no extra API key.
 - Good quality for English semantic search.
-- Downside: it's a small model. Both retrieval misses in the evaluation come from it (e.g. it doesn't match "law" in the question with "Act" in the text). A bigger model would do better.
+- Downside: it's a small model. It can struggle with exact codes/terms and with table chunks that mix several facts. A bigger model would do better.
 
 ### Vector store — ChromaDB
 - Stores the text, embeddings and metadata (file, page, chunk ID) together.
@@ -167,15 +166,15 @@ If the answer is not in the documents, `answer` is "Insufficient information..."
 - For production I would use a hosted DB like Qdrant or Pinecone.
 
 ### Retrieval — top 5 chunks + similarity threshold
-- **Top 5:** in my test, 3 chunks missed too much and 8 only helped slightly while doubling the prompt size.
-- **Next chunk added:** for each retrieved chunk, the next chunk on the same page is also sent to the LLM. Lists and definitions are often cut between two chunks; this was the biggest improvement in the evaluation.
-- **Threshold (distance ≤ 0.75):** if no chunk is similar enough, the system answers "insufficient information" without calling the LLM at all. Real questions scored 0.19–0.44; an off-topic one ("Who won the 2022 FIFA World Cup?") scored 0.85.
+- **Top 5:** in my test the right page was in the top 3 for 10/11 questions and in the top 5 for 11/11. Going to 8 found nothing more and would send much more text to the LLM.
+- **Next chunk added:** for each retrieved chunk, the next chunk on the same page is also sent to the LLM. Lists and definitions are often cut between two chunks, so this gives the LLM the full text.
+- **Threshold (distance ≤ 0.75):** if no chunk is similar enough, the system answers "insufficient information" without calling the LLM at all. Real questions scored 0.33–0.68; an off-topic one ("Who won the 2022 FIFA World Cup?") scored 0.95.
 
 ### LLM and prompt
 - **Groq + `openai/gpt-oss-120b`:** fast, low cost and follows instructions well. Temperature is 0 for consistent answers.
 - The prompt says: use only the given context, cite every fact as `[1]`, `[2]`..., and if the answer isn't there, reply with an exact "insufficient information" sentence.
 - Only the chunks the model actually cited are returned as sources.
-- **Two layers against hallucination:** the threshold stops off-topic questions, and the prompt rule handles questions that sound related but aren't answered in the documents (e.g. "What is the budget of the U.S. AI Safety Institute?" — the institute is mentioned, the budget isn't).
+- **Two layers against hallucination:** the threshold stops off-topic questions, and the prompt rule handles questions that sound related but aren't answered in the documents (e.g. "How much will Dukaan Saathi cost a merchant per month?" — the product is described, the price isn't).
 - **Fallback:** if the main model fails (outage, rate limit, timeout), the smaller `gpt-oss-20b` is tried automatically.
 
 ### Logging
@@ -183,18 +182,15 @@ Uploads (pages, chunks), retrieval (similarity scores), LLM calls (model, time, 
 
 ## Evaluation
 
-15 questions on two public NIST documents in `data/` (AI Risk Management Framework and Generative AI Profile): 12 answerable and 3 that the documents can't answer.
+15 questions on `data/Dukaan-Saathi.pdf` (a hackathon pitch deck): 11 with answers in the deck and 4 that it can't answer. The script collects the answers; I then checked each one against the PDF by hand.
 
-| Metric | Result |
+| Result | |
 |---|---|
-| Answer accuracy (automatic check) | 13 / 15 |
-| **Answer accuracy (checked by hand)** | **12 / 15** |
-| Right page found in top 5 | 10 / 12 |
-| Unanswerable questions correctly refused | 3 / 3 |
+| **Answer accuracy** | **14 / 15** |
+| Answerable questions correct (with the right page cited) | 11 / 11 |
+| Unanswerable questions correctly refused | 3 / 4 |
 
-The 3 failures:
-- 2 retrieval misses — the embedding model didn't find the right chunk (hybrid search fixed one of them in my test).
-- 1 answer where the model added a wrong extra item to a list.
+The one failure: asked how many merchants will be in the pilot, the model answered "one real merchant". The deck actually leaves the number blank ("[__] merchants") and mentions "one real merchant" in a different sentence, so the model mixed the two up.
 
 Full results and analysis: [eval/results.md](eval/results.md). Run it with `python -m eval.run_eval`.
 
@@ -213,7 +209,7 @@ Covers file validation (wrong type, empty, fake or text-less PDF), empty questio
 - Chunks don't cross pages, so a paragraph continuing on the next page is split.
 - No conversation history — each question is independent.
 - All documents share one collection (no per-user separation), and the API has no delete endpoint.
-- The threshold was tuned on two documents and may need adjusting for very different ones.
+- The threshold and top-k were tuned on one short document and 15 questions, so longer or very different documents may need a higher top-k or a different threshold.
 - Uploads are processed inside the request, so a very large PDF takes a while. (Large files are saved in batches, and only the top chunks go to the LLM, so size doesn't affect the prompt.)
 
 ## Scaling and production ideas

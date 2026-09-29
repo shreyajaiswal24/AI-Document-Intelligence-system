@@ -1,78 +1,67 @@
 # Evaluation Results
 
-**Documents** (both public domain, in `data/`):
-- `NIST.AI.100-1.pdf` — AI Risk Management Framework 1.0 (48 pages, 277 chunks)
-- `NIST.AI.600-1.pdf` — Generative AI Profile (64 pages, 401 chunks)
+**Document:** `data/Dukaan-Saathi.pdf` — a 12-page hackathon pitch deck (20 chunks)
 
-**Settings:** chunk size 600, overlap 100, top-k 5 (+ next chunk added as context), max cosine distance 0.75, model `openai/gpt-oss-120b` on Groq
-**Run it:** `python -m eval.run_eval` (full answers are saved in `results.csv`)
+**Settings:** chunk size 600, overlap 100, top 5 chunks (+ next chunk added), max distance 0.75, `openai/gpt-oss-120b` on Groq
 
-| # | Question | Expected answer | System answer (short) | Source | Correct |
-|---|----------|-----------------|-----------------------|--------|---------|
-| 1 | What are the four functions of the AI RMF Core? | GOVERN, MAP, MEASURE, MANAGE | GOVERN, MAP, MEASURE, MANAGE | 100-1 p25 | Y |
-| 2 | Which law directed NIST to develop the AI RMF? | National AI Initiative Act of 2020 | Insufficient information | - | **N** |
-| 3 | Which AI RMF function is described as cross-cutting? | GOVERN | GOVERN, infused throughout the other three | 100-1 p25 | Y |
-| 4 | Why are AI systems described as socio-technical? | Influenced by societal dynamics and human behavior | Same | 100-1 p6 | Y |
-| 5 | Characteristics of trustworthy AI? | Valid & reliable, safe, secure & resilient, accountable & transparent, explainable & interpretable, privacy-enhanced, fair | All 7 | 100-1 p17 | Y |
-| 6 | Where can comments on the AI RMF Playbook be sent? | AIframework@nist.gov | AIframework@nist.gov | 100-1 p3 | Y |
-| 7 | How does the GAI Profile define confabulation? | Confidently stated but false content | Same, also mentions "hallucinations" | 600-1 p10 | Y |
-| 8 | What does the Environmental Impacts risk refer to? | High compute/energy use for training and running models | Energy- and carbon-intensive training | 600-1 p12 | Y |
-| 9 | Four primary considerations of the GAI Public Working Group? | Governance, Content Provenance, Pre-deployment Testing, Incident Disclosure | Insufficient information | - | **N** |
-| 10 | Which GAI risks fall under misuse by humans? | CBRN, Data Privacy, Human-AI Configuration, Obscene Content, Information Integrity, Information Security | All 6 **plus "Homogenization"** (wrong) | 600-1 p7 | **N** (manual) |
-| 11 | When was the GAI Profile published? | July 2024 | July 2024 | 600-1 p2 | Y |
-| 12 | Which executive order is the GAI Profile a response to? | EO 14110 | EO 14110 | 600-1 p5 | Y |
-| 13 | Annual budget of the U.S. AI Safety Institute? | Not in documents | Insufficient information | - | Y |
-| 14 | How many parameters does GPT-4 have? | Not in documents | Insufficient information | - | Y |
-| 15 | Who won the 2022 FIFA World Cup? | Not in documents | Insufficient information | - | Y |
+**How I evaluated:** I wrote 15 questions — 11 with answers in the deck and 4 that the deck can't answer. `python -m eval.run_eval` asks all of them and saves the answers to `results.csv`. Then I read each answer, compared it with the expected answer and the PDF page, and marked it correct (Y/N) by hand.
+
+| # | Question | Expected answer | Retrieved answer (short) | Source | Correct |
+|---|---|---|---|---|---|
+| 1 | Which hackathon and track? | Paytm Build for India AI Hackathon, Track 1: Merchant Growth AI | Same | p1 | Y |
+| 2 | Who is the merchant persona? | Ramesh, kirana + chai counter in Dadar, Mumbai | Same | p2 | Y |
+| 3 | What does Regulars Radar do? | Finds repeat payers who went quiet, suggests a nudge | Same | p5 | Y |
+| 4 | Which LLM is used, and the fallback? | Sarvam-M, Groq fallback | Same | p8 | Y |
+| 5 | Which tool is used for memory? | Cognee (knowledge graph of the shop) | Same | p8 | Y |
+| 6 | What are the steps of the agent loop? | Observe, Diagnose, Recommend, Approve, Act, Learn | Same | p7 | Y |
+| 7 | Can Dukaan Saathi move money? | No — only reads payments and pre-fills forms | Same | p7 | Y |
+| 8 | Yesterday's sales in the sample brief? | 6,200, 18% below Tuesday average | Same | p4 | Y |
+| 9 | What happens at 1:45 in the demo? | One-tap offer approval, n8n workflow fires | Same | p10 | Y |
+| 10 | Which n8n actions are in the MVP? | Offer, restock order, loan pre-fill | Same | p11 | Y |
+| 11 | What does the team ask Paytm for? | Sandbox API access + one real merchant to pilot with | Same | p12 | Y |
+| 12 | How many merchants in the pilot? | Not stated — the deck has a blank "[__] merchants" | **"One real merchant"** | p12 | **N** |
+| 13 | Cost per month for a merchant? | Not in document | Insufficient information | - | Y |
+| 14 | Did Dukaan Saathi win the hackathon? | Not in document | Insufficient information | - | Y |
+| 15 | Who won the 2022 FIFA World Cup? | Not in document | Insufficient information | - | Y |
 
 ## Summary
 
-| Metric | Result |
-|---|---|
-| Answer accuracy (automatic keyword check) | 13 / 15 |
-| **Answer accuracy (after reading every answer myself)** | **12 / 15** |
-| Retrieval hit rate (an expected page is in the top 5) | 10 / 12 |
-| Correct abstentions on unanswerable questions | 3 / 3 |
-| Hallucinated answers to unanswerable questions | 0 |
+- **Answer accuracy: 14 / 15**
+- Answerable questions: 11 / 11 correct, all with the right page cited
+- Unanswerable questions: 3 / 4 correctly refused
 
-The automatic check says a question is correct if the answer contains all expected keywords (or abstains for unanswerable ones). It marked Q10 correct because all 6 expected risks were there, but reading the answer showed an extra wrong item, so I count it as wrong. Keyword checks can't catch extra wrong content — that's why I review manually.
+## Failure: Q12 (pilot size)
 
-**How the abstentions happened:** only Q15 (World Cup, best distance 0.85) was stopped by the distance threshold before calling the LLM. Q13 (0.39) and Q14 (0.73) passed the threshold — the AI Safety Institute and GPT-4 are mentioned in the documents — and the LLM correctly answered "insufficient information" because of the prompt rule. So both layers matter: the threshold only catches clearly off-topic questions.
+The deck mentions two different pilots:
+- p11 (roadmap): "Pilot with **[__]** merchants in Mumbai" — the number was left blank.
+- p12 (ask to Paytm): "one real merchant in Mumbai to pilot the morning brief with".
 
-## Failure analysis
-
-**Q2 — retrieval miss (vocabulary mismatch).** The question says "law", the document says "National Artificial Intelligence Initiative Act ... As directed by". The top 5 chunks were other general pages about the AI RMF (all with distance ~0.2, very similar to each other), so the right chunk didn't make it. I tested keyword search (BM25) on this question and it didn't find it either — "law" isn't in the text. Fix: query rewriting (ask the LLM to rephrase the question before searching) or a stronger embedding model.
-
-**Q9 — retrieval miss.** The answer is on p6 of the GAI Profile, but the small embedding model ranked other "working group / public" pages higher. **BM25 ranked the correct page #1** for this question, so hybrid search (BM25 + vectors) would fix this one.
-
-**Q10 — the model added a wrong item.** The source text lists the three risk groups one after another on the same line: `...Harmful Bias, and Homogenization; 2) Misuse by humans (or malicious use): CBRN...`. The model pulled "Homogenization" from the end of group 1 into group 2. This is an LLM reading error, not retrieval.
-
-## What I changed during evaluation
-
-1. **Ligatures.** These PDFs store "fi" as a single character (`ﬁ`), so words like "conﬁdently" didn't match "confidently". Added Unicode NFKC normalisation to the cleaner.
-2. **Information split across chunks.** The first run scored Q10 with only 1 of 6 risks: the list started at the end of one chunk and continued in the next one, which wasn't retrieved. Now, for each retrieved chunk, the next chunk on the same page is added as context. This fixed Q10's list and Q3 (the "cross-cutting" sentence was in the following chunk). Together with fixes 3 and 4, automatic accuracy went from 9/15 to 13/15.
-3. **Expected sources.** My first expected pages were too narrow: confabulation is defined on p8 *and* in its own section on p10; Environmental Impacts on p8 and p12. Both are valid, so both count now.
-4. **Eval scoring.** The model sometimes writes "July 2024" with a special narrow space (` `) or uses non-standard hyphens, so the keyword check failed on correct answers. The answer is now normalised before comparing.
+The model found the p12 sentence and answered "one real merchant", mixing up the two. It isn't a made-up answer (the text is really there), but it answers a different question. Possible fixes: tell the model in the prompt to treat blanks like "[__]" as missing information, or make sure both chunks are shown so it can notice the difference.
 
 ## Chunk size and top-k
 
-Retrieval hit rate on the 12 answerable questions:
+How often the right page was in the top k results, for the 11 answerable questions:
 
 | chunk size / overlap | k=3 | k=5 | k=8 |
 |---|---|---|---|
-| 400 / 80 | 8/12 | 10/12 | 11/12 |
-| 600 / 100 | 8/12 | 10/12 | 11/12 |
-| 800 / 150 | 9/12 | 10/12 | 10/12 |
-| 1000 / 200 | 8/12 | 9/12 | 11/12 |
+| 400 / 80 | 10/11 | 10/11 | 10/11 |
+| **600 / 100** | 10/11 | **11/11** | 11/11 |
+| 800 / 150 | 9/11 | 9/11 | 10/11 |
+| 1000 / 200 | 9/11 | 9/11 | 10/11 |
 
-Sizes from 400 to 800 perform about the same here; 1000 is worse at k=5. I kept 600/100 with k=5: it is well within the embedding model's 256-token limit, and k=5 plus next-chunk expansion gives the LLM enough context without a huge prompt. k=8 would gain one question but doubles the prompt size.
+600/100 was the best (or tied) at every k. With k=5 every expected page is found, so I kept k=5 — k=8 wouldn't find anything more and would send 40% of this short document to the LLM for every question.
 
-Note: the hit rate is measured by page, so it can be a bit optimistic — a hit means *a* chunk from the right page was retrieved, not necessarily the chunk with the answer (this happened in Q3 before the next-chunk fix).
+Note: I tuned these on the same 15 questions and one short document, so the numbers are optimistic. A longer document would probably need a higher k.
+
+## Other observations
+
+- Similarity distance of the best chunk was 0.33–0.68 for answerable questions and 0.95 for the World Cup question, so the 0.75 threshold stops clearly off-topic questions before calling the LLM.
+- The other three unanswerable questions (0.45–0.58) passed the threshold because they are about Dukaan Saathi; the prompt rule is what made the model refuse. Both layers are needed.
+- The deck is made of slides with short phrases and tables, and extraction still worked well; e.g. the agent loop (Q6) and the demo timeline (Q9) came out correctly even though they are laid out as diagrams/tables.
 
 ## Possible improvements
 
-- **Hybrid search (BM25 + vectors):** tested, fixes Q9.
-- **Query rewriting** before retrieval: would help vocabulary mismatches like Q2.
-- **Reranker** (cross-encoder) on the top 10-20 chunks.
-- **Drop reference/bibliography pages** from the index: they show up in results for broad questions (e.g. p60-61 of the GAI Profile) without useful content.
-- **Bigger evaluation set** and an LLM-as-judge to catch errors like Q10 automatically.
+- **Prompt rule for blanks/placeholders** (fixes Q12).
+- **Hybrid search (keywords + vectors)** for exact terms and names.
+- **Table-aware extraction**, so each table row becomes its own chunk.
+- **More documents and more questions**, and a second person marking the answers.
