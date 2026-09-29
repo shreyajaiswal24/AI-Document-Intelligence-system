@@ -145,77 +145,80 @@ If the answer is not in the documents, `answer` is "Insufficient information..."
 ## Design decisions
 
 ### PDF processing
-PyMuPDF is fast and gives text page by page, so every chunk keeps its page number. Cleaning is kept minimal: remove lines that are only page numbers, re-join words hyphenated across lines, and collapse extra whitespace. I chunk each page separately so every chunk maps to exactly one page for citations.
+- **PyMuPDF** reads the text page by page, so every chunk knows which page it came from.
+- Cleaning is kept light: fix special characters (like the "ﬁ" ligature), remove page-number lines, re-join hyphenated words and remove extra spaces.
+- Each page is chunked separately, so every citation points to exactly one page.
 
 ### Chunking — 600 characters, 100 overlap
-- The embedding model only reads the first 256 tokens (~1000 characters), so chunks must stay below that or the end is silently ignored.
-- I compared 400/600/800/1000 on the evaluation questions (table in [eval/results.md](eval/results.md)). 400–800 performed about the same and 1000 was worse. Smaller chunks keep one topic per chunk, so the embedding is not a "blend" of several topics.
-- The splitter cuts at a paragraph, then sentence, then line, then word boundary, so chunks don't stop mid-word.
-- 100 characters of overlap (about 1-2 sentences) means a fact sitting on a chunk border appears whole in at least one chunk.
+- The embedding model only reads about 1000 characters, so chunks must be smaller than that.
+- I tested 400, 600, 800 and 1000 characters (see [eval/results.md](eval/results.md)). 400–800 worked about the same, 1000 was worse.
+- Smaller chunks usually hold one topic, which makes search more accurate.
+- Chunks are cut at a paragraph, sentence or word boundary, never in the middle of a word.
+- The 100-character overlap means a sentence on the border between two chunks is not lost.
 
 ### Embeddings — all-MiniLM-L6-v2
-- Runs locally (ONNX, CPU) through ChromaDB's default embedding function: no extra API key, no cost, no network call per chunk.
-- Small and fast (384 dimensions) with good quality for semantic search in English.
-- Trade-off: it is a small model. Both retrieval misses in the evaluation are on this model (e.g. it doesn't link "law" in a question with "Act" in the text). A larger model such as `bge-base` would likely do better, at the cost of speed and a heavier install.
+- Runs locally on CPU: free, fast, and no extra API key.
+- Good quality for English semantic search.
+- Downside: it's a small model. Both retrieval misses in the evaluation come from it (e.g. it doesn't match "law" in the question with "Act" in the text). A bigger model would do better.
 
 ### Vector store — ChromaDB
-Stores embeddings, text and metadata together, supports cosine distance and saves to disk. Nothing to deploy and anyone can run the project after cloning. For production I would move to Qdrant or Pinecone (see below).
+- Stores the text, embeddings and metadata (file, page, chunk ID) together.
+- Saves to a local folder, so the project runs right after cloning — nothing else to install or host.
+- For production I would use a hosted DB like Qdrant or Pinecone.
 
-### Retrieval — top-k 5 + distance threshold
-- k=5 gave the best recall vs. context size trade-off in my test (k=3 found 8/12, k=5 10/12, k=8 11/12 but with a much bigger prompt).
-- **Next-chunk expansion:** for every retrieved chunk, the next chunk from the same page is added to the context. Lists and definitions are often cut at a chunk border (the start is retrieved, the rest isn't). This was the single biggest improvement in the evaluation (see results).
-- **Threshold (cosine distance ≤ 0.75):** if no chunk passes, the system answers "insufficient information" **without calling the LLM** — it can't hallucinate, and it saves a call. On the evaluation set, the best chunk for answerable questions was between 0.19 and 0.44, and for a fully off-topic question ("Who won the 2022 FIFA World Cup?") 0.85, so 0.75 sits between them with some margin for harder questions.
-- The threshold only catches off-topic questions. Questions that *sound* related but aren't answered in the document ("What is the annual budget of the U.S. AI Safety Institute?" — 0.39, the institute is mentioned but not its budget) pass the threshold, so for those the prompt rule is what makes the model abstain. That's why both layers are needed.
+### Retrieval — top 5 chunks + similarity threshold
+- **Top 5:** in my test, 3 chunks missed too much and 8 only helped slightly while doubling the prompt size.
+- **Next chunk added:** for each retrieved chunk, the next chunk on the same page is also sent to the LLM. Lists and definitions are often cut between two chunks; this was the biggest improvement in the evaluation.
+- **Threshold (distance ≤ 0.75):** if no chunk is similar enough, the system answers "insufficient information" without calling the LLM at all. Real questions scored 0.19–0.44; an off-topic one ("Who won the 2022 FIFA World Cup?") scored 0.85.
 
 ### LLM and prompt
-- Groq with `openai/gpt-oss-120b`: fast, cheap, good at following instructions. `temperature=0` for consistent answers.
-- The prompt tells the model to use only the numbered context, cite each fact as `[n]`, and reply with an exact "insufficient information" sentence if the answer isn't there. Using an exact sentence makes it easy to detect in code.
-- Only the chunks the model actually cited are returned as citations.
-- Two layers against hallucination: the distance threshold (before the LLM) and the prompt rule (inside the LLM).
-- If the main model fails (outage, rate limit, timeout), the request is retried with a smaller fallback model.
+- **Groq + `openai/gpt-oss-120b`:** fast, low cost and follows instructions well. Temperature is 0 for consistent answers.
+- The prompt says: use only the given context, cite every fact as `[1]`, `[2]`..., and if the answer isn't there, reply with an exact "insufficient information" sentence.
+- Only the chunks the model actually cited are returned as sources.
+- **Two layers against hallucination:** the threshold stops off-topic questions, and the prompt rule handles questions that sound related but aren't answered in the documents (e.g. "What is the budget of the U.S. AI Safety Institute?" — the institute is mentioned, the budget isn't).
+- **Fallback:** if the main model fails (outage, rate limit, timeout), the smaller `gpt-oss-20b` is tried automatically.
 
 ### Logging
-Every upload (pages, chunk count), retrieval (distances of the retrieved chunks), LLM call (model, latency, tokens) and error is logged with a timestamp.
+Uploads (pages, chunks), retrieval (similarity scores), LLM calls (model, time, tokens) and all errors are logged with timestamps.
 
 ## Evaluation
 
-15 questions over two public-domain NIST documents in `data/` — the AI Risk Management Framework (NIST AI 100-1) and the Generative AI Profile (NIST AI 600-1): 12 answerable (6 per document, including definitions, lists and dates) and 3 unanswerable (one of them about something the documents mention but don't answer).
+15 questions on two public NIST documents in `data/` (AI Risk Management Framework and Generative AI Profile): 12 answerable and 3 that the documents can't answer.
 
 | Metric | Result |
 |---|---|
-| Answer accuracy (automatic keyword check) | 13 / 15 |
-| **Answer accuracy (after reading every answer)** | **12 / 15** |
-| Retrieval hit rate (right page in top 5) | 10 / 12 |
-| Correct abstentions on unanswerable questions | 3 / 3 |
+| Answer accuracy (automatic check) | 13 / 15 |
+| **Answer accuracy (checked by hand)** | **12 / 15** |
+| Right page found in top 5 | 10 / 12 |
+| Unanswerable questions correctly refused | 3 / 3 |
 
-The 3 failures: two retrieval misses (the small embedding model didn't find the right chunk; hybrid search fixes one of them in my test) and one answer where the model added an extra wrong item to a list.
+The 3 failures:
+- 2 retrieval misses — the embedding model didn't find the right chunk (hybrid search fixed one of them in my test).
+- 1 answer where the model added a wrong extra item to a list.
 
-Full table, failure analysis and improvements: [eval/results.md](eval/results.md). Run it with:
-```bash
-python -m eval.run_eval
-```
+Full results and analysis: [eval/results.md](eval/results.md). Run it with `python -m eval.run_eval`.
 
 ## Tests
 
 ```bash
 pytest -q
 ```
-They cover upload validation (wrong type, empty, fake PDF, PDF without text), empty questions, citation parsing, the "no LLM call when nothing is relevant" rule, and the text splitter.
+Covers file validation (wrong type, empty, fake or text-less PDF), empty questions, citation parsing, the "no LLM call when nothing is relevant" rule, vector-DB failure handling and text cleaning/splitting.
 
 ## Limitations
 
-- **No OCR:** scanned PDFs are rejected with a 422 error.
-- **Tables and dense lists** are extracted as plain text and can lose their structure (the model mixed up two adjacent lists in one evaluation question).
-- **Retrieval uses vectors only.** Exact names and terms are sometimes missed; hybrid search (BM25 + vectors) is the next step.
-- **Chunks never cross page boundaries,** so a paragraph continuing on the next page is split.
-- **No conversation history:** every question is independent.
-- **Single collection:** all uploaded documents are searched together; there is no per-user separation and no delete endpoint.
-- The distance threshold was tuned on one document; it may need adjusting for very different documents.
-- Upload runs synchronously, so a very large PDF blocks that request while it is embedded. Chunks are written to Chroma in batches of 500, so large documents don't hit Chroma's batch limit, and only the top chunks are ever sent to the LLM, so document size doesn't affect prompt size.
+- No OCR — scanned PDFs are rejected.
+- Tables and dense lists lose their layout when extracted as plain text.
+- Search is vector-only, so exact names and terms are sometimes missed.
+- Chunks don't cross pages, so a paragraph continuing on the next page is split.
+- No conversation history — each question is independent.
+- All documents share one collection (no per-user separation), and the API has no delete endpoint.
+- The threshold was tuned on two documents and may need adjusting for very different ones.
+- Uploads are processed inside the request, so a very large PDF takes a while. (Large files are saved in batches, and only the top chunks go to the LLM, so size doesn't affect the prompt.)
 
 ## Scaling and production ideas
 
-- **1,000 concurrent users:** run several Uvicorn workers behind a load balancer; move to a hosted vector DB (Qdrant/Pinecone) shared by all instances; process uploads in a background queue (Celery/RQ) instead of in the request.
-- **Cost:** embeddings are already local and free; cache answers for repeated questions; send fewer, better chunks (reranker); use the smaller model for simple questions.
-- **Better retrieval:** hybrid search (BM25 + vectors) for exact terms like numbers and names, a cross-encoder reranker, and adding neighbouring chunks for context.
-- **Monitoring:** track latency, token usage, error rate and the "insufficient information" rate; tracing with Langfuse or LangSmith.
+- **1,000 concurrent users:** several API workers behind a load balancer, a hosted vector DB shared by all of them, and uploads processed in a background queue.
+- **Lower cost:** cache answers to repeated questions, send fewer but better chunks, and use the smaller model for simple questions.
+- **Better retrieval:** hybrid search (keywords + vectors), a reranker, and rewriting the question before searching.
+- **Monitoring:** track response time, token usage, errors and how often the system says "insufficient information".
