@@ -118,29 +118,22 @@ Uploading the same file again replaces its chunks (no duplicates).
 ```bash
 curl -X POST http://localhost:8000/ask \
   -H "Content-Type: application/json" \
-  -d '{"question": "What is confabulation?"}'
+  -d '{"question": "What are the four functions of the AI RMF Core?"}'
 ```
+Returns the answer and the sources it used (file name and page for each citation):
 ```json
 {
-  "answer": "Confabulation is the phenomenon in which generative-AI systems produce and confidently present erroneous or false content, often called \"hallucinations\" ... [1][4]",
-  "citations": [
-    {"ref": 1, "file_name": "NIST.AI.600-1.pdf", "page": 10,
-     "chunk_id": "NIST.AI.600-1.pdf-p10-c0", "distance": 0.277, "text": "2.2. Confabulation ..."},
-    {"ref": 4, "file_name": "NIST.AI.600-1.pdf", "page": 8,
-     "chunk_id": "NIST.AI.600-1.pdf-p8-c0", "distance": 0.718, "text": "1. CBRN Information or Capabilities ..."}
-  ],
+  "answer": "The AI RMF Core has four functions: GOVERN, MAP, MEASURE and MANAGE [1].",
+  "citations": [{"file_name": "NIST.AI.100-1.pdf", "page": 25}],
   "answered": true
 }
 ```
-When the answer is not in the documents:
-```json
-{"answer": "Insufficient information in the provided documents to answer this question.", "citations": [], "answered": false}
-```
+If the answer is not in the documents, `answer` is "Insufficient information..." and `answered` is `false`.
 
 | Status | When |
 |---|---|
 | 400 | empty question, or no documents uploaded yet |
-| 503 | Groq API key missing, or both models failed |
+| 503 | Groq API key missing, LLM unavailable, or vector DB error |
 | 500 | unexpected error (logged) |
 
 ### `GET /health`
