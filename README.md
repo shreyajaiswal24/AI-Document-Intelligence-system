@@ -4,6 +4,8 @@ Upload PDF documents and ask questions about them. Answers come only from the do
 
 **Stack:** FastAPI · PyMuPDF · ChromaDB · all-MiniLM-L6-v2 embeddings · Groq (`openai/gpt-oss-120b`)
 
+**Live demo:** https://ai-document-intelligence-system-nrqumvzxycdpvhcvygyfjq.streamlit.app/
+
 ## Architecture
 
 ```mermaid
@@ -85,7 +87,9 @@ docker run -p 8000:8000 --env-file .env doc-qa
 
 ## Web UI
 
-A simple Streamlit page to upload PDFs and ask questions.
+A simple Streamlit page to upload PDFs and ask questions. Live version: https://ai-document-intelligence-system-nrqumvzxycdpvhcvygyfjq.streamlit.app/
+
+To run it locally:
 
 ```bash
 streamlit run streamlit_app.py
