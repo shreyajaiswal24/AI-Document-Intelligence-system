@@ -83,30 +83,13 @@ docker run -p 8000:8000 --env-file .env doc-qa
 | `MAX_DISTANCE` | `0.75` | Chunks less similar than this are ignored |
 | `MAX_FILE_MB` | `20` | Upload size limit |
 
-## Web UI (Streamlit)
+## Web UI
 
-A simple page to upload PDFs and ask questions, for demos. It calls the same pipeline code as the API (`app/`) directly.
+A simple Streamlit page to upload PDFs and ask questions.
 
 ```bash
-streamlit run streamlit_app.py      # opens http://localhost:8501
+streamlit run streamlit_app.py
 ```
-
-- Sidebar: upload one or more PDFs → **Process**; indexed documents are listed and can be removed.
-- Main page: type a question → **Ask**. The answer is shown with expandable sources (file + page + text).
-
-Don't run the API and the UI against the same `chroma_db` folder at the same time — Chroma's local mode is meant for one process. Use a different `CHROMA_DIR` for each if you need both.
-
-### Deploy on Streamlit Community Cloud (free)
-
-1. Push this repo to GitHub.
-2. Go to [share.streamlit.io](https://share.streamlit.io) → **Create app** → pick the repo, branch `main`, main file `streamlit_app.py`. Under **Advanced settings** choose Python 3.10 or 3.11.
-3. In **Advanced settings → Secrets**, add:
-   ```toml
-   GROQ_API_KEY = "your_groq_api_key"
-   ```
-4. Deploy. The first start takes a few minutes (installing packages and downloading the embedding model).
-
-Note: on Streamlit Cloud the vector DB lives on the app's temporary disk, so uploaded documents are lost when the app restarts, and all visitors share the same documents. Fine for a demo; a real deployment would use a hosted vector DB and per-user collections.
 
 ## API
 
